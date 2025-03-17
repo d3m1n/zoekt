@@ -1,0 +1,3 @@
+machine ${NETRC_MACHINE}
+login ${GITLAB_PAT_NAME}
+password ${GITLAB_PAT}

@@ -1,6 +1,6 @@
 FROM alpine:3.19
 
-RUN apk add --no-cache ca-certificates bind-tools tini git jansson
+RUN apk add --no-cache ca-certificates bind-tools tini git jansson gettext
 
 # Run as non-root user sourcegraph. External volumes should be mounted under /data (which will be owned by sourcegraph).
 RUN mkdir -p /home/sourcegraph
@@ -8,9 +8,13 @@ RUN addgroup -S sourcegraph && adduser -S -G sourcegraph -h /home/sourcegraph so
 USER sourcegraph
 WORKDIR /home/sourcegraph
 
-ENV SRC_FRONTEND_INTERNAL http://sourcegraph-frontend-internal
-ENV DATA_DIR /data/index
-RUN mkdir -p ${DATA_DIR}
+RUN mkdir -p /data
+
+COPY ./indexserver-entrypoint.sh \
+     ./.netrc.template \
+     ./config.json.template \
+     ./gitlab_token.txt.template \
+     ./
 
 COPY --from=zoekt \
     /usr/local/bin/universal-* \
@@ -21,4 +25,5 @@ COPY --from=zoekt \
     /usr/local/bin/zoekt-mirror-gitlab \
     /usr/local/bin/
 
-ENTRYPOINT ["/sbin/tini", "--", "zoekt-indexserver"]
+ENTRYPOINT ["/sbin/tini", "--", "./indexserver-entrypoint.sh"]
+CMD ["zoekt-indexserver", "-mirror_config", "config.json", "-data_dir", "/data"]

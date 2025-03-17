@@ -1,0 +1,6 @@
+[
+    {
+      "GitLabURL": "https://${NETRC_MACHINE}/",
+      "CredentialPath": "gitlab_token.txt"
+    }
+]
